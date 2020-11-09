@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <canvas id="my-canvas" width="300" height="300"></canvas>
+
+  </body>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
+  <script src="https://d3js.org/d3-quadtree.v2.min.js"></script>
+  <script src="https://d3js.org/d3-timer.v2.min.js"></script>
+  <script src="https://d3js.org/d3-force.v2.min.js"></script>
+  <script>
+    const nodes = [
+      { id: "lpc-ios" },
+      { id: "lpc-web" },
+      { id: "lpc-core" },
+      { id: "lpc-utils" }
+    ];
+    const links = [
+      { source: "lpc-ios", target: "lpc-core" },
+      { source: "lpc-web", target: "lpc-core" },
+      { source: "lpc-core", target: "lpc-utils" },
+    ];
+    const simulation = d3.forceSimulation(nodes)
+            .force("charge", d3.forceManyBody())
+            .force("link", d3.forceLink(links).distance(100).id(d => d.id))
+            .force("center", d3.forceCenter(150, 150));
+    const canvas = document.getElementById("my-canvas");
+    const ctx = canvas.getContext("2d");
+    simulation.on("tick", (a) => {
+      console.log("tick")
+      ctx.clearRect(0,0,300,300)
+      ctx.font = "10px Arial";
+      links.forEach(l => {
+        
+
+      });
+      nodes.forEach(n => {
+        ctx.fillText(n.id, n.x-15, n.y + 3);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 25, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
+    })
+  </script>
+</html>
