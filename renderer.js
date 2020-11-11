@@ -8,8 +8,10 @@ const body = document.getElementsByTagName("body")[0];
 for (let i = 0; i <= iterations ; i++) {
   const graph = JSON.parse(ipcRenderer.sendSync('get-graph',  i));
 
-  const nodes = graph.nodes;
-  const links = graph.links;
+  let nodes = graph.nodes;
+  let links = graph.links;
+  nodes = nodes.filter(n => n.id !== "root")
+  links = links.filter(l => l.source !== "root")
   const scale = 4;
   const window_size = 800;
   const simulation = d3.forceSimulation(nodes)
@@ -73,7 +75,7 @@ for (let i = 0; i <= iterations ; i++) {
       ctx.arc(x, y, 25, 0, scale * Math.PI);
       ctx.fill();
       ctx.fillStyle = "black";
-      ctx.fillText(n.id, x-15, y + 3);
+      ctx.fillText(n.id.split("+")[0], x-15, y + 3);
     });
   })
 
