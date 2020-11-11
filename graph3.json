@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    { "id": "root"},
+    { "id": "A"},
+    { "id": "B" },
+    { "id": "C" },
+    { "id": "F" },
+    { "id": "F@2.0.0" }
+  ],
+  "links": [
+    { "source": "root", "target": "A" },
+    { "source": "A", "target": "B" },
+    { "source": "A", "target": "F@2.0.0" },
+    { "source": "B", "target": "C" },
+    { "source": "C", "target": "B" },
+    { "source": "C", "target": "F", "type": "peer" },
+    { "source": "B", "target": "F", "type": "peer" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "js-graph",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:VincentBailly/js-graph.git",
+  "author": "Vincent Bailly <vincent.bailly@microsoft.com>",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@types/d3-force": "^2.1.0",
+    "d3-force": "^2.1.1",
+    "electron": "^10.1.5"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    { "id": "root"},
+    { "id": "A"},
+    { "id": "B" },
+    { "id": "C" },
+    { "id": "D" },
+    { "id": "E" },
+    { "id": "D@1.0.0" },
+    { "id": "E@1.0.0" },
+    { "id": "E@2.0.0" }
+  ],
+  "links": [
+    { "source": "root", "target": "A" },
+
+    { "source": "A", "target": "B" },
+    { "source": "B", "target": "C" },
+    { "source": "C", "target": "B" },
+
+    { "source": "A", "target": "E@2.0.0" },
+    { "source": "B", "target": "D@1.0.0" },
+    { "source": "C", "target": "E@1.0.0" },
+
+    { "source": "B", "target": "E", "type": "peer" },
+    { "source": "C", "target": "D", "type": "peer" }
+  ]
+}

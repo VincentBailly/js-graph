@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    { "id": "root"},
+    { "id": "lpc-core"},
+    { "id": "lpc-card" },
+    { "id": "lpc-utils" }
+  ],
+  "links": [
+    { "source": "lpc-core", "target": "lpc-card" },
+    { "source": "root", "target": "lpc-core" },
+    { "source": "lpc-core", "target": "lpc-utils" },
+    { "source": "lpc-card", "target": "lpc-utils", "type": "peer" },
+    { "source": "lpc-utils", "target": "lpc-card", "type": "peer" }
+  ]
+}
