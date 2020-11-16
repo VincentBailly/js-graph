@@ -1,8 +1,8 @@
 //const { app, BrowserWindow, ipcMain } = require("electron");
-const fs = require('fs');
+import * as fs from "fs";
 
-const { resolve_peer_dependencies } = require('./resolve-peer-dependencies');
-const { gc } = require("./gc");
+import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
+import { gc } from "./gc";
 
 const input = fs.readFileSync(process.argv[2]);
 const steps = [JSON.parse(input.toString())];
@@ -10,7 +10,7 @@ steps.push(gc(resolve_peer_dependencies(steps[0])));
 while (steps[steps.length - 1] !== steps[steps.length - 2]) {
   steps.push(resolve_peer_dependencies(steps[steps.length - 1]));
 }
-console.log(JSON.stringify(JSON.parse(steps[steps.length - 1]), undefined, 2));
+console.log(JSON.stringify({ nodes: steps[steps.length - 1].nodes, links: steps[steps.length -1].links.filter(l => l.type !== "peer")}, undefined, 2));
 /*
 function createWindow () {
   const win = new BrowserWindow({
