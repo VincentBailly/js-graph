@@ -1,13 +1,24 @@
+const memo_get_name = new Map();
+function get_name(name_and_version) {
+  if (memo_get_name.has(name_and_version)) {
+    return memo_get_name.get(name_and_version);
+  }
+  const result = name_and_version.split("@")[0];
+  memo_get_name.set(name_and_version, result);
+  return result;
+}
+
 function fulfill_peer_dependency(links, parent_relationship, peer_dependency) {
   // The parent actually fulfills the peer_dependency
-  if (parent_relationship.source.split("+")[0].split("@")[0] === peer_dependency.target) {
+  if (get_name(parent_relationship.source) === peer_dependency.target) {
     return parent_relationship.source;
   }
 
-  const result = links.filter(l => l.source === parent_relationship.source && l.target.split("+")[0].split("@")[0] === peer_dependency.target && l.type !== "peer")[0];
+  const result = links.filter(l => l.source === parent_relationship.source && get_name(l.target) === peer_dependency.target && l.type !== "peer")[0];
   return result ? result.target : undefined;
 }
 
+// TODO: to optimize perf, make link as two map of map instead of a flat list
 exports.resolve_peer_dependencies = function(input) {
   const active_peer_dependencies = input.links.filter(l => l.type === "peer");
   const packages_with_peer_dependencies = new Set(active_peer_dependencies.map(l => l.source));
@@ -32,17 +43,24 @@ exports.resolve_peer_dependencies = function(input) {
   }
 
   const winner = fulfilled_peer_dependencies[0];
+  return update_graph_with_fullfilled_dependencies(winner, input.nodes, input.links, fulfilled_peer_dependencies.slice(1));
+}
 
-  const newPackage = `${winner.peer_dependency.source}+(${winner.result})`;
-  if (input.nodes.filter(n => n.id === newPackage).length === 1) {
-    const nodes = input.nodes;
-    const links = input.links.filter(l => l !== winner.parent_relationship).concat([{source:winner.parent_relationship.source, target: newPackage }]);
-
-    return { nodes, links };
-  } else {
-    const nodes = [...input.nodes, {id:newPackage}];
-    const links = input.links.filter(l => l !== winner.parent_relationship).concat(input.links.filter(l => l.source === winner.peer_dependency.source && l !== winner.peer_dependency).map(l => ({ source: newPackage, target: l.target, type: l.type}))).concat([{source: newPackage, target: winner.result}, {source:winner.parent_relationship.source, target: newPackage }]);
-
+function update_graph_with_fullfilled_dependencies(winner, nodes, links, left) {
+  if (left.length === 0) {
     return { nodes, links };
   }
+
+  const newPackage = `${winner.peer_dependency.source}+(${winner.result})`;
+  if (nodes.filter(n => n.id === newPackage).length === 1) {
+    const new_links = links.filter(l => l !== winner.parent_relationship).concat([{source:winner.parent_relationship.source, target: newPackage }]);
+
+    return update_graph_with_fullfilled_dependencies(left[0], nodes, new_links, left.slice(1));
+  } else {
+    const new_nodes = [...nodes, {id:newPackage}];
+    const new_links = links.filter(l => l !== winner.parent_relationship).concat(links.filter(l => l.source === winner.peer_dependency.source && l !== winner.peer_dependency).map(l => ({ source: newPackage, target: l.target, type: l.type}))).concat([{source: newPackage, target: winner.result}, {source:winner.parent_relationship.source, target: newPackage }]);
+
+    return update_graph_with_fullfilled_dependencies(left[0], new_nodes, new_links, left.slice(1));
+  }
+
 }
