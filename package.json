@@ -5,13 +5,16 @@
   "repository": "git@github.com:VincentBailly/js-graph.git",
   "author": "Vincent Bailly <vincent.bailly@microsoft.com>",
   "scripts": {
+    "watch": "tsc --watch",
+    "build": "tsc",
     "start": "electron main.js"
   },
   "license": "MIT",
   "dependencies": {
     "@types/d3-force": "^2.1.0",
     "d3-force": "^2.1.1",
-    "electron": "^10.1.5"
+    "electron": "^10.1.5",
+    "functional-red-black-tree": "^1.0.1"
   },
   "devDependencies": {
     "@types/node": "^14.14.7",

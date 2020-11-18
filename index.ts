@@ -2,15 +2,55 @@
 import * as fs from "fs";
 
 import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
-import { gc } from "./gc";
+import { GraphLink, RegularLink, PeerLink, Tree, TreeGraph } from "./types";
+
+type UntypedTree = { get: (key: string) => (any | undefined), insert: (index: string, value: any) => UntypedTree, remove: (index: string) => UntypedTree };
+
+type TreeCreator = () => UntypedTree;
+const createTree: TreeCreator = require("functional-red-black-tree");
+
+function isRegularLink(link: GraphLink): link is RegularLink {
+  return link.type === "regular";
+}
+
+function isPeerLink(link: GraphLink): link is PeerLink {
+  return link.type === "peer";
+}
 
 const input = fs.readFileSync(process.argv[2]);
-const steps = [JSON.parse(input.toString())];
-steps.push(gc(resolve_peer_dependencies(steps[0])));
-while (steps[steps.length - 1] !== steps[steps.length - 2]) {
-  steps.push(resolve_peer_dependencies(steps[steps.length - 1]));
+const inputGraph : { nodes: string[], links: GraphLink[] } = JSON.parse(input.toString());
+
+const regularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
+  const subTree = p.get(n.source);
+  return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
+}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+
+const invertedRegularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
+  const subTree = p.get(n.target);
+  return p.remove(n.target).insert(n.target, subTree.insert(n.source, n.source));
+}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+
+const peerLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isPeerLink).reduce((p, n) => {
+  const subTree = p.get(n.source);
+  return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
+}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+
+const nodesTree: Tree<string> = inputGraph.nodes.reduce((p, n) => p.insert(n, n), createTree() as Tree<string>);
+
+const treeGraph: TreeGraph = { nodes: nodesTree, peerLinks: peerLinksTree, regularLink: regularLinksTree, invertedRegularLink: invertedRegularLinksTree };
+
+
+function resolveTreeGraph(treeGraph: TreeGraph): TreeGraph {
+  const newTreeGraph = resolve_peer_dependencies(treeGraph);
+  if (treeGraph === newTreeGraph) {
+    return treeGraph;
+  }
+  return resolveTreeGraph(newTreeGraph);
 }
-console.log(JSON.stringify({ nodes: steps[steps.length - 1].nodes, links: steps[steps.length -1].links.filter(l => l.type !== "peer")}, undefined, 2));
+
+const result = resolveTreeGraph(treeGraph);
+
+console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.regularLink.keys.map(p => result.regularLink.get(p).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
 /*
 function createWindow () {
   const win = new BrowserWindow({
