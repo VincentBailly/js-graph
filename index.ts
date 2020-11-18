@@ -4,10 +4,24 @@ import * as fs from "fs";
 import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
 import { GraphLink, RegularLink, PeerLink, Tree, TreeGraph } from "./types";
 
-type UntypedTree = { get: (key: string) => (any | undefined), insert: (index: string, value: any) => UntypedTree, remove: (index: string) => UntypedTree };
 
-type TreeCreator = () => UntypedTree;
-const createTree: TreeCreator = require("functional-red-black-tree");
+//const createTree: TreeCreator = require("functional-red-black-tree");
+function createTree<T>(): Tree<T> {
+  const map = new Map<string, T>();
+  return wrapMapInTree(map);
+}
+
+function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
+  const result = {
+    get: (index: string) => map.get(index),
+    insert: (index: string, value: T) => { map.set(index, value); return wrapMapInTree(map); },
+    remove: (index: string) => { map.delete(index); return wrapMapInTree(map); },
+    values: Array.from(map.values()),
+    keys: Array.from(map.keys())
+  }
+  return result;
+}
+
 
 function isRegularLink(link: GraphLink): link is RegularLink {
   return link.type === "regular";

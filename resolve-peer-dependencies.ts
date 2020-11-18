@@ -1,7 +1,21 @@
 import { Tree, TreeGraph } from "./types";
 
 type Name = { value: string, type: "name" };
-const createTree: any = require("functional-red-black-tree");
+function createTree<T>(): Tree<T> {
+  const map = new Map<string, T>();
+  return wrapMapInTree(map);
+}
+
+function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
+  const result = {
+    get: (index: string) => map.get(index),
+    insert: (index: string, value: T) => { map.set(index, value); return wrapMapInTree(map); },
+    remove: (index: string) => { map.delete(index); return wrapMapInTree(map); },
+    values: Array.from(map.values()),
+    keys: Array.from(map.keys())
+  }
+  return result;
+}
 
 function makeName(name: string): Name {
   return { value: name, type: "name" };
@@ -83,7 +97,7 @@ function createVirtualPackage(graph: TreeGraph, child: string, newChild: string)
   const newRegularLinks = graph.regularLink.insert(newChild, newNodeLinks);
   const newPeerLink = graph.peerLinks.get(child);
   const newPeerLinks = graph.peerLinks.insert(newChild, newPeerLink);
-  const invertedLinksNeededToBeUpdated = newNodeLinks.keys.map(k => ({name: k, tree: graph.regularLink.get(k)}));
+  const invertedLinksNeededToBeUpdated = newNodeLinks.keys.map(k => ({name: k, tree: graph.invertedRegularLink.get(k)}));
   const updatedInvertedLinks = invertedLinksNeededToBeUpdated.reduce((p, n) => {
     return p.remove(n.name).insert(n.name, n.tree.insert(newChild, newChild));
   }, graph.invertedRegularLink).insert(newChild, createTree() as Tree<string>);
@@ -107,13 +121,13 @@ function removePeerDependency(graph: TreeGraph, children: string, peer: string):
   const invertedRegularLink = childrenToUpdate.reduce((p,n) => {
     const newNode = p.get(n).remove(oldName);
     return p.remove(n).insert(n, newNode);
-  }, graph.invertedRegularLink);
+  }, graph.invertedRegularLink).remove(oldName);
   return { nodes, regularLink, peerLinks: peer, invertedRegularLink };
 }
 
 function update_graph_with_fullfilled_dependencies(fullfilment: {parent: string, children: string, peer: string, result: string}, graph: TreeGraph): TreeGraph {
   const { parent, children, peer } = fullfilment;
-  if (graph.nodes.get(children) === undefined) {
+  if (graph.nodes.get(children) === undefined || graph.nodes.get(parent) === undefined) {
     // the peer dependency does not exist anymore
     return graph;
   }
