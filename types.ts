@@ -12,5 +12,3 @@ export type Tree<T> = {
   keys: string[]
 };
 
-export type TreeGraph = { nodes: Tree<string>, peerLinks: Tree<Tree<string>>, invertedRegularLink: Tree<Tree<string>>, regularLink: Tree<Tree<string>> };
-

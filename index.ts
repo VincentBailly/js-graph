@@ -2,26 +2,11 @@
 import * as fs from "fs";
 
 import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
-import { GraphLink, RegularLink, PeerLink, Tree, TreeGraph } from "./types";
+import { GraphLink, RegularLink, PeerLink, Tree } from "./types";
+
+import { RGraph } from "./RGraph";
 
 const createTree: <T>() => Tree<T> = require("functional-red-black-tree");
-/*function createTree<T>(): Tree<T> {
-  const map = new Map<string, T>();
-  return wrapMapInTree(map);
-}
-
-function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
-  const result = {
-    get: (index: string) => map.get(index),
-    insert: (index: string, value: T) => { map.set(index, value); return wrapMapInTree(map); },
-    remove: (index: string) => { map.delete(index); return wrapMapInTree(map); },
-    values: Array.from(map.values()),
-    keys: Array.from(map.keys())
-  }
-  return result;
-}
-*/
-
 
 function isRegularLink(link: GraphLink): link is RegularLink {
   return link.type !== "peer";
@@ -34,7 +19,7 @@ function isPeerLink(link: GraphLink): link is PeerLink {
 const input = fs.readFileSync(process.argv[2]);
 const inputGraph : { nodes: string[], links: GraphLink[] } = JSON.parse(input.toString());
 
-const regularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
+const links: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
   const subTree = p.get(n.source);
   if (subTree) {
     return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
@@ -43,7 +28,7 @@ const regularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLi
   }
 }, createTree() as Tree<Tree<string>>);
 
-const invertedRegularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
+const reversedLinks: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
   const subTree = p.get(n.target);
   if (subTree) {
     return p.remove(n.target).insert(n.target, subTree.insert(n.source, n.source));
@@ -52,7 +37,7 @@ const invertedRegularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isR
   }
 }, createTree() as Tree<Tree<string>>);
 
-const peerLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isPeerLink).reduce((p, n) => {
+const peerLinks: Tree<Tree<string>> = inputGraph.links.filter(isPeerLink).reduce((p, n) => {
   const subTree = p.get(n.source);
   if (subTree) {
     return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
@@ -61,22 +46,22 @@ const peerLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isPeerLink).re
   }
 }, createTree() as Tree<Tree<string>>);
 
-const nodesTree: Tree<string> = inputGraph.nodes.reduce((p, n) => p.insert(n, n), createTree() as Tree<string>);
+const nodes: Tree<string> = inputGraph.nodes.reduce((p, n) => p.insert(n, n), createTree() as Tree<string>);
 
-const treeGraph: TreeGraph = { nodes: nodesTree, peerLinks: peerLinksTree, regularLink: regularLinksTree, invertedRegularLink: invertedRegularLinksTree };
+const rGraph: RGraph = { nodes: nodes, links: links, reversedLinks, peerLinks };
 
 
-function resolveTreeGraph(treeGraph: TreeGraph): TreeGraph {
-  const newTreeGraph = resolve_peer_dependencies(treeGraph);
-  if (treeGraph === newTreeGraph) {
-    return treeGraph;
+function resolveTreeGraph(graph: RGraph): RGraph {
+  const newTreeGraph = resolve_peer_dependencies(graph);
+  if (graph === newTreeGraph) {
+    return graph;
   }
   return resolveTreeGraph(newTreeGraph);
 }
 
-const result = resolveTreeGraph(treeGraph);
+const result = resolveTreeGraph(rGraph);
 
-console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.regularLink.keys.map(p => (result.regularLink.get(p) as Tree<string>).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
+console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.links.keys.map(p => (result.links.get(p) as Tree<string>).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
 
 /*
 function createWindow () {
