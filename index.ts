@@ -36,18 +36,30 @@ const inputGraph : { nodes: string[], links: GraphLink[] } = JSON.parse(input.to
 
 const regularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
   const subTree = p.get(n.source);
-  return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
-}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+  if (subTree) {
+    return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
+  } else {
+    return p.insert(n.source, (createTree() as Tree<string>).insert(n.target, n.target));
+  }
+}, createTree() as Tree<Tree<string>>);
 
 const invertedRegularLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isRegularLink).reduce((p, n) => {
   const subTree = p.get(n.target);
-  return p.remove(n.target).insert(n.target, subTree.insert(n.source, n.source));
-}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+  if (subTree) {
+    return p.remove(n.target).insert(n.target, subTree.insert(n.source, n.source));
+  } else {
+    return p.insert(n.target, (createTree() as Tree<string>).insert(n.source, n.source));
+  }
+}, createTree() as Tree<Tree<string>>);
 
 const peerLinksTree: Tree<Tree<string>> = inputGraph.links.filter(isPeerLink).reduce((p, n) => {
   const subTree = p.get(n.source);
-  return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
-}, inputGraph.nodes.reduce((acc, next) => acc.insert(next, createTree() as Tree<string>), createTree() as Tree<Tree<string>>));
+  if (subTree) {
+    return p.remove(n.source).insert(n.source, subTree.insert(n.target, n.target));
+  } else {
+    return p.insert(n.source, (createTree() as Tree<string>).insert(n.target, n.target));
+  }
+}, createTree() as Tree<Tree<string>>);
 
 const nodesTree: Tree<string> = inputGraph.nodes.reduce((p, n) => p.insert(n, n), createTree() as Tree<string>);
 
@@ -64,7 +76,7 @@ function resolveTreeGraph(treeGraph: TreeGraph): TreeGraph {
 
 const result = resolveTreeGraph(treeGraph);
 
-console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.regularLink.keys.map(p => result.regularLink.get(p).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
+console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.regularLink.keys.map(p => (result.regularLink.get(p) as Tree<string>).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
 
 /*
 function createWindow () {

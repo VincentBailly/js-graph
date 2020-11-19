@@ -1,11 +1,10 @@
 {
   "nodes": [
-    { "id": "root"},
-    { "id": "A"},
-    { "id": "B" },
-    { "id": "C" },
-    { "id": "F" },
-    { "id": "F@2.0.0" }
+    "root",
+    "A",
+    "B",
+    "C",
+    "F@2.0.0"
   ],
   "links": [
     { "source": "root", "target": "A" },

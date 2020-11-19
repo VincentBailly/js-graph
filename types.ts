@@ -4,7 +4,7 @@ export type GraphLink = RegularLink | PeerLink;
 export type Graph = { nodes: string[], links: GraphLink[] };
 
 export type Tree<T> = {  
-  get: (key: string) => (T | undefined), 
+  get(key: string): (undefined | T), 
   insert: (index: string, value: T) => Tree<T>, 
   remove: (index: string) => Tree<T>,
   find: (index: string) => { tree: { root: { value: T } } },
@@ -13,5 +13,4 @@ export type Tree<T> = {
 };
 
 export type TreeGraph = { nodes: Tree<string>, peerLinks: Tree<Tree<string>>, invertedRegularLink: Tree<Tree<string>>, regularLink: Tree<Tree<string>> };
-
 

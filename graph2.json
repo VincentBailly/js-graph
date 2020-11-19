@@ -1,9 +1,9 @@
 {
   "nodes": [
-    { "id": "root"},
-    { "id": "lpc-core"},
-    { "id": "lpc-card" },
-    { "id": "lpc-utils" }
+    "root",
+    "lpc-core",
+    "lpc-card",
+    "lpc-utils"
   ],
   "links": [
     { "source": "lpc-core", "target": "lpc-card" },
