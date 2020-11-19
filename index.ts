@@ -5,8 +5,8 @@ import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
 import { GraphLink, RegularLink, PeerLink, Tree, TreeGraph } from "./types";
 
 
-//const createTree: TreeCreator = require("functional-red-black-tree");
-function createTree<T>(): Tree<T> {
+const createTree: <T>() => Tree<T> = require("functional-red-black-tree");
+/*function createTree<T>(): Tree<T> {
   const map = new Map<string, T>();
   return wrapMapInTree(map);
 }
@@ -21,6 +21,7 @@ function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
   }
   return result;
 }
+*/
 
 
 function isRegularLink(link: GraphLink): link is RegularLink {

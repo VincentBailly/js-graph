@@ -1,7 +1,8 @@
 import { Tree, TreeGraph } from "./types";
 
 type Name = { value: string, type: "name" };
-function createTree<T>(): Tree<T> {
+const createTree: <T>() => Tree<T> = require("functional-red-black-tree");
+/*function createTree<T>(): Tree<T> {
   const map = new Map<string, T>();
   return wrapMapInTree(map);
 }
@@ -16,6 +17,7 @@ function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
   }
   return result;
 }
+*/
 
 function makeName(name: string): Name {
   return { value: name, type: "name" };
