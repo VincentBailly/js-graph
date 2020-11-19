@@ -4,7 +4,6 @@ import * as fs from "fs";
 import { resolve_peer_dependencies } from "./resolve-peer-dependencies";
 import { GraphLink, RegularLink, PeerLink, Tree, TreeGraph } from "./types";
 
-
 const createTree: <T>() => Tree<T> = require("functional-red-black-tree");
 /*function createTree<T>(): Tree<T> {
   const map = new Map<string, T>();
@@ -25,7 +24,7 @@ function wrapMapInTree<T>(map: Map<string, T>): Tree<T> {
 
 
 function isRegularLink(link: GraphLink): link is RegularLink {
-  return link.type === "regular";
+  return link.type !== "peer";
 }
 
 function isPeerLink(link: GraphLink): link is PeerLink {
@@ -66,6 +65,7 @@ function resolveTreeGraph(treeGraph: TreeGraph): TreeGraph {
 const result = resolveTreeGraph(treeGraph);
 
 console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.regularLink.keys.map(p => result.regularLink.get(p).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
+
 /*
 function createWindow () {
   const win = new BrowserWindow({
@@ -91,7 +91,7 @@ ipcMain.on('get-iterations', (event) => {
 
 ipcMain.on('get-graph', (event, i) => {
   if (i === 0) { event.returnValue = steps[0] }
-  else { event.returnValue = steps[steps.length - 1]}
+  else { event.returnValue = JSON.stringify(result)}
 })
 
 app.whenReady().then(createWindow);

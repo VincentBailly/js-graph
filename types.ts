@@ -7,6 +7,7 @@ export type Tree<T> = {
   get: (key: string) => (T | undefined), 
   insert: (index: string, value: T) => Tree<T>, 
   remove: (index: string) => Tree<T>,
+  find: (index: string) => { tree: { root: { value: T } } },
   values: T[],
   keys: string[]
 };

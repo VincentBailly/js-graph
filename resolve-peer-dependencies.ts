@@ -128,12 +128,12 @@ function removePeerDependency(graph: TreeGraph, children: string, peer: string):
 }
 
 function update_graph_with_fullfilled_dependencies(fullfilment: {parent: string, children: string, peer: string, result: string}, graph: TreeGraph): TreeGraph {
-  const { parent, children, peer } = fullfilment;
+  const { parent, children, peer, result } = fullfilment;
   if (graph.nodes.get(children) === undefined || graph.nodes.get(parent) === undefined) {
     // the peer dependency does not exist anymore
     return graph;
   }
-  const newPackage = `${children}+(${peer})`;
+  const newPackage = `${children}+(${result})`;
   if (graph.nodes.get(newPackage) !== undefined) {
     const g1 = changeRegularDependency(graph, parent, children, newPackage);
     const g2 = removePeerDependency(g1, children, peer);

@@ -1,13 +1,12 @@
 {
   "nodes": [
-    { "id": "root" },
-    { "id": "lpc-ios" },
-    { "id": "lpc-web" },
-    { "id": "lpc-core" },
-    { "id": "react" },
-    { "id": "react@16.8" },
-    { "id": "react@16.9" },
-    { "id": "lpc-utils" }
+    "root",
+    "lpc-ios" ,
+    "lpc-web" ,
+    "lpc-core" ,
+    "react@16.8" ,
+    "react@16.9" ,
+    "lpc-utils" 
   ],
   "links": [
     { "source": "root", "target": "lpc-ios" },
