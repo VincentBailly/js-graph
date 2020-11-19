@@ -135,14 +135,16 @@ function update_graph_with_fullfilled_dependencies(fullfilment: {parent: string,
   if (graph.nodes.get(newPackage) !== undefined) {
     const g1 = changeRegularDependency(graph, parent, children, newPackage);
     const g2 = removePeerDependency(g1, children, peer);
-    const g3 = gc(g2, children);
-    return g3;
+    const g3 = removePeerDependency(g2, newPackage, peer);
+    const g4 = gc(g3, children);
+    return g4;
   } else {
     const g1 = createVirtualPackage(graph, children, newPackage);
     const g2 = changeRegularDependency(g1, parent, children, newPackage);
     const g3 = removePeerDependency(g2, children, peer);
-    const g4 = gc(g3, children);
-    return g4;
+    const g4 = removePeerDependency(g3, newPackage, peer);
+    const g5 = gc(g4, children);
+    return g5;
   }
 
 }
