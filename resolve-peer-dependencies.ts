@@ -1,14 +1,8 @@
-import { Tree } from "./types";
+import { Tree, TreeIterator } from "./types";
 import { RGraph, addLink, removeLink, removePeerLink, addNode, removeNode, addPeerLink } from "./RGraph";
 
-type Name = { value: string, type: "name" };
-
-function makeName(name: string): Name {
-  return { value: name, type: "name" };
-}
-
-const memo_get_name = new Map<string, Name>();
-function get_name(name_and_version: string): Name {
+const memo_get_name = new Map<string, string>();
+function get_name(name_and_version: string): string {
   const memo = memo_get_name.get(name_and_version);
   if (memo) {
     return memo;
@@ -19,45 +13,99 @@ function get_name(name_and_version: string): Name {
   const index = withoutResolvedPeerDeps.slice(1).indexOf("@");
   const indexOfRelevenAt = index === -1 ? withoutResolvedPeerDeps.length : index + 1;
   const result = withoutResolvedPeerDeps.substr(0, indexOfRelevenAt);
-  memo_get_name.set(name_and_version, makeName(result));
-  return makeName(result);
+  memo_get_name.set(name_and_version, result);
+  return result;
 }
 
-function fulfill_peer_dependency(input: RGraph, parent: string, peer: string): string | undefined {
-  // The parent actually fulfills the peer_dependency
+function testFillfillment(parentChild: TreeIterator<string>, peer: string) : string | undefined {
+  const child = parentChild.key;
 
-  if (get_name(parent).value === peer) {
-    return parent;
+  if (get_name(child) === peer) {
+    return child;
   }
   
-  const candidates = (input.links.get(parent) as Tree<string>).values.filter(d => get_name(d).value === peer);
-  if (candidates.length > 0) {
-    return candidates[0];
+  if (parentChild.hasNext) {
+    parentChild.next();
+    return testFillfillment(parentChild, peer);
   }
+  
+  return undefined;
+}
+
+function getNextFulfillingParent(input: RGraph, parentIter: TreeIterator<string>, peer: string): { parent: string, result: string } | undefined {
+  const parent = parentIter.key;
+
+  if (get_name(parent) === peer) {
+    return { parent, result: parent };
+  }
+
+  const children = input.links.get(parent)
+  if (children && children.keys.length !== 0) {
+    const result = testFillfillment(children.begin, peer);
+    if (result) {
+      return { parent, result };
+    }
+  }
+
+  if (parentIter.hasNext) {
+    parentIter.next();
+    return getNextFulfillingParent(input, parentIter, peer);
+  }
+  
+  return undefined;
+}
+
+function tryFullfillAGivenDependency(input: RGraph, peerDependencies: TreeIterator<string>, child: string): { parent: string, peer: string, result: string } | undefined {
+  const peer = peerDependencies.key;
+
+  const parents = input.reversedLinks.get(child)
+  if (parents && parents.keys.length !== 0) {
+    const result = getNextFulfillingParent(input, parents.begin, peer);
+    if (result) {
+      return { ...result, peer };
+    }
+  }
+
+  if (peerDependencies.hasNext) {
+    peerDependencies.next()
+    return tryFullfillAGivenDependency(input, peerDependencies, child);
+  }
+
+  return undefined;
+}
+
+function tryFullfillNextPeerDependency(input: RGraph, peerDependencies: TreeIterator<Tree<string>>): { parent: string, children: string, peer: string, result: string } | undefined {
+  debugger
+  const child = peerDependencies.key;
+  const peers = peerDependencies.value;
+
+
+  if (peers.keys.length !== 0) {
+    const result = tryFullfillAGivenDependency(input, peers.begin, child);
+    if (result) {
+      return { ...result, children: child };
+    }
+  }
+
+  if (peerDependencies.hasNext) {
+    peerDependencies.next();
+    return tryFullfillNextPeerDependency(input, peerDependencies);
+  }
+
   return undefined;
 }
 
 export function resolve_peer_dependencies (input: RGraph): RGraph {
-  const packages_with_peer_dependencies = input.peerLinks.keys;
-  const parent_relationships_for_packages_with_peer_dependencies = packages_with_peer_dependencies.map(p => (input.reversedLinks.get(p) as Tree<string>).keys.map(parent => ({ source: parent, target: p }))).reduce((p,n) => [...p, ...n], []);
-  const peer_dependencies_to_fulfill = parent_relationships_for_packages_with_peer_dependencies.map(parent_relationship => 
-    (input.peerLinks.get(parent_relationship.target) as Tree<string>).keys.map(peer => ({ parent: parent_relationship.source, children: parent_relationship.target, peer}))).reduce((p,n) => ([...p, ...n]), []);
-
-  const fulfilled_peer_dependencies : {parent: string, children: string, peer: string, result: string}[] = peer_dependencies_to_fulfill.map(({parent, children, peer}) => ({parent, children, peer, result: fulfill_peer_dependency(input, parent, peer)})).filter(a => a.result !== undefined).sort((a, b) => {
-    if (a.parent > b.parent) { return 1; }
-    if (a.parent < b.parent) { return -1; }
-    if (a.children > b.children) { return 1; }
-    if (a.children < b.children) { return -1; }
-    if ((a.result as string) > (b.result as string)) { return 1; }
-    if ((a.result as string) < (b.result as string)) { return -1; }
-    return 0;
-  }) as {parent: string, children: string, peer: string, result: string}[];
-
-  if (fulfilled_peer_dependencies.length === 0) {
+  if (input.peerLinks.keys.length === 0) {
     return input;
   }
 
-  const result = fulfilled_peer_dependencies.slice(0, 1).reduce((acc, next) => update_graph_with_fullfilled_dependencies(next, acc), input);
+  const nextFullfilledPeerDependency = tryFullfillNextPeerDependency(input, input.peerLinks.begin);
+  if (!nextFullfilledPeerDependency) {
+    return input;
+  }
+
+  const result = update_graph_with_fullfilled_dependencies(nextFullfilledPeerDependency, input);
   return result;
 }
 
