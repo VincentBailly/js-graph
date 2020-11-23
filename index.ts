@@ -59,49 +59,35 @@ function resolveTreeGraph(graph: RGraph): RGraph {
   return resolveTreeGraph(newTreeGraph);
 }
 
-const result = resolveTreeGraph(rGraph);
+const result = gc(resolveTreeGraph(rGraph));
 
-console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.links.keys.map(p => (result.links.get(p) as Tree<string>).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));
-
-/*
-function createWindow () {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true
-    }
-  });
-
-  win.loadFile('index.html');
-  //win.webContents.openDevTools();
+function visit(input: RGraph, visited: Tree<string>, current: string) : Tree<string> {
+  const n1 = visited.insert(current, current);
+  const next = input.links.get(current);
+  if (!next) {
+    return n1;
+  }
+  const n2 = next.keys.reduce((acc, next) => acc.get(next) ? acc : visit(input, acc, next), n1);
+  return n2;
 }
 
-process.stdin.on('data', _d => {
-  step = resolve_peer_dependencies(step);
-  createWindow();
-})
+function trimLinks2(toKeep: Tree<string>, toTrim: Tree<string>): Tree<string> {
+  const start = createTree<string>();
+  const result = toTrim.keys.reduce((acc, next) => toKeep.get(next) ? acc.insert(next, next) : acc, start);
+  return result;
+}
 
-ipcMain.on('get-iterations', (event) => {
-  event.returnValue = 1;
-})
+function trimLinks(toKeep: Tree<string>, toTrim: Tree<Tree<string>>): Tree<Tree<string>> {
+  const start = createTree<Tree<string>>();
+  const result = toTrim.keys.reduce((acc, next) => {
+    return toKeep.get(next) ? acc.insert(next, trimLinks2(toKeep, toTrim.get(next) as Tree<string>)) : acc;
+  }, start);
+  return result
+}
 
-ipcMain.on('get-graph', (event, i) => {
-  if (i === 0) { event.returnValue = steps[0] }
-  else { event.returnValue = JSON.stringify(result)}
-})
+function gc(input: RGraph): RGraph {
+  const reachable = visit(input, createTree<string>(), "root");
+  return { nodes: reachable, links: trimLinks(reachable, input.links), reversedLinks: createTree(), peerLinks: createTree() };
+}
 
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-*/
+console.log(JSON.stringify({ nodes: result.nodes.keys, links: result.links.keys.map(p => (result.links.get(p) as Tree<string>).keys.map(c => ({source: p, target: c}))).reduce((p,n) => [...p, ...n], [])}, undefined, 2));

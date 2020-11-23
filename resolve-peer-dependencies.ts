@@ -75,7 +75,6 @@ function tryFullfillAGivenDependency(input: RGraph, peerDependencies: TreeIterat
 }
 
 function tryFullfillNextPeerDependency(input: RGraph, peerDependencies: TreeIterator<Tree<string>>): { parent: string, children: string, peer: string, result: string } | undefined {
-  debugger
   const child = peerDependencies.key;
   const peers = peerDependencies.value;
 
@@ -96,6 +95,7 @@ function tryFullfillNextPeerDependency(input: RGraph, peerDependencies: TreeIter
 }
 
 export function resolve_peer_dependencies (input: RGraph): RGraph {
+  debugger
   if (input.peerLinks.keys.length === 0) {
     return input;
   }

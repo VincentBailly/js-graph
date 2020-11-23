@@ -1,0 +1,62 @@
+{
+  "nodes": [
+    "A",
+    "B+(E@1.0.0)",
+    "B+(E@2.0.0)",
+    "C+(D@1.0.0)",
+    "D@1.0.0",
+    "E@1.0.0",
+    "E@2.0.0",
+    "root"
+  ],
+  "links": [
+    {
+      "source": "A",
+      "target": "B+(E@2.0.0)"
+    },
+    {
+      "source": "A",
+      "target": "E@2.0.0"
+    },
+    {
+      "source": "B+(E@1.0.0)",
+      "target": "C+(D@1.0.0)"
+    },
+    {
+      "source": "B+(E@1.0.0)",
+      "target": "D@1.0.0"
+    },
+    {
+      "source": "B+(E@1.0.0)",
+      "target": "E@1.0.0"
+    },
+    {
+      "source": "B+(E@2.0.0)",
+      "target": "C+(D@1.0.0)"
+    },
+    {
+      "source": "B+(E@2.0.0)",
+      "target": "D@1.0.0"
+    },
+    {
+      "source": "B+(E@2.0.0)",
+      "target": "E@2.0.0"
+    },
+    {
+      "source": "C+(D@1.0.0)",
+      "target": "B+(E@1.0.0)"
+    },
+    {
+      "source": "C+(D@1.0.0)",
+      "target": "D@1.0.0"
+    },
+    {
+      "source": "C+(D@1.0.0)",
+      "target": "E@1.0.0"
+    },
+    {
+      "source": "root",
+      "target": "A"
+    }
+  ]
+}

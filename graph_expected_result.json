@@ -1,0 +1,54 @@
+{
+  "nodes": [
+    "lpc-core+(react@16.8)",
+    "lpc-core+(react@16.9)",
+    "lpc-ios",
+    "lpc-utils",
+    "lpc-web",
+    "react@16.8",
+    "react@16.9",
+    "root"
+  ],
+  "links": [
+    {
+      "source": "lpc-core+(react@16.8)",
+      "target": "lpc-utils"
+    },
+    {
+      "source": "lpc-core+(react@16.8)",
+      "target": "react@16.8"
+    },
+    {
+      "source": "lpc-core+(react@16.9)",
+      "target": "lpc-utils"
+    },
+    {
+      "source": "lpc-core+(react@16.9)",
+      "target": "react@16.9"
+    },
+    {
+      "source": "lpc-ios",
+      "target": "lpc-core+(react@16.8)"
+    },
+    {
+      "source": "lpc-ios",
+      "target": "react@16.8"
+    },
+    {
+      "source": "lpc-web",
+      "target": "lpc-core+(react@16.9)"
+    },
+    {
+      "source": "lpc-web",
+      "target": "react@16.9"
+    },
+    {
+      "source": "root",
+      "target": "lpc-ios"
+    },
+    {
+      "source": "root",
+      "target": "lpc-web"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    "lpc-card+(lpc-utils)",
+    "lpc-core",
+    "lpc-utils+(lpc-card+(lpc-utils))",
+    "root"
+  ],
+  "links": [
+    {
+      "source": "lpc-card+(lpc-utils)",
+      "target": "lpc-utils+(lpc-card+(lpc-utils))"
+    },
+    {
+      "source": "lpc-core",
+      "target": "lpc-card+(lpc-utils)"
+    },
+    {
+      "source": "lpc-core",
+      "target": "lpc-utils+(lpc-card+(lpc-utils))"
+    },
+    {
+      "source": "lpc-utils+(lpc-card+(lpc-utils))",
+      "target": "lpc-card+(lpc-utils)"
+    },
+    {
+      "source": "root",
+      "target": "lpc-core"
+    }
+  ]
+}

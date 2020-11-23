@@ -1,0 +1,39 @@
+{
+  "nodes": [
+    "A",
+    "B+(F@2.0.0)",
+    "C+(F@2.0.0)",
+    "F@2.0.0",
+    "root"
+  ],
+  "links": [
+    {
+      "source": "A",
+      "target": "B+(F@2.0.0)"
+    },
+    {
+      "source": "A",
+      "target": "F@2.0.0"
+    },
+    {
+      "source": "B+(F@2.0.0)",
+      "target": "C+(F@2.0.0)"
+    },
+    {
+      "source": "B+(F@2.0.0)",
+      "target": "F@2.0.0"
+    },
+    {
+      "source": "C+(F@2.0.0)",
+      "target": "B+(F@2.0.0)"
+    },
+    {
+      "source": "C+(F@2.0.0)",
+      "target": "F@2.0.0"
+    },
+    {
+      "source": "root",
+      "target": "A"
+    }
+  ]
+}
